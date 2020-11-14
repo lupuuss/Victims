@@ -71,6 +71,7 @@ data class Victim (
             }
         }
 
+        object Id : StringBased()
         object Name : StringBased()
         object Age : IntBased()
         object Gender : StringBased()
@@ -85,10 +86,10 @@ data class Victim (
 
         companion object {
             val values: List<Property<*>> = listOf(
-                    Name, Age, Gender,
-                    Race, Date, City,
-                    State, MannerOfDeath, Armed,
-                    MentalIllness, Flee
+                    Id, Name, Age,
+                    Gender, Race, Date,
+                    City, State, MannerOfDeath,
+                    Armed, MentalIllness, Flee
             )
 
             fun of(name: String) = values.find { it.name.equals(name, ignoreCase = true) }!!

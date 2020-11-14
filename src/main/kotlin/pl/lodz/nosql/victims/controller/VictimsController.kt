@@ -61,4 +61,9 @@ class VictimsController {
     fun addVictim(@RequestBody detailsNow: VictimDetailsNow): Victim {
         return victimsService.addNewVictimNow(detailsNow)
     }
+
+    @DeleteMapping("/victim/remove/id/{id}")
+    fun removeVictimById(@PathVariable id: String) {
+        return victimsService.removeVictim(id)
+    }
 }

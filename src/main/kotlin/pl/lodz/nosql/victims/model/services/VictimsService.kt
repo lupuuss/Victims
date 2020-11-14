@@ -68,6 +68,7 @@ class VictimsService {
     private fun findBy(property: Victim.Property<*>, value: String, sort: Sort): Stream<Victim> {
 
         return when (property) {
+            is Victim.Property.Id -> repository.findById(value).map { listOf(it) }.orElseGet { emptyList() }
             is Victim.Property.Name -> repository.findByNameContains(value, sort)
             is Victim.Property.Age -> repository.findByAge(property.mapArg(value), sort)
             is Victim.Property.Gender -> repository.findByGender(value, sort)
@@ -105,5 +106,10 @@ class VictimsService {
         val victim = victimDetailsNow.toVictim(idGenerator.generate(), Date())
 
         return repository.save(victim)
+    }
+
+    fun removeVictim(id: String) {
+
+        repository.deleteById(id)
     }
 }
