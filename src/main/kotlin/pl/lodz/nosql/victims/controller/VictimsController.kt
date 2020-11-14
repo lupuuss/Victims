@@ -25,9 +25,9 @@ class VictimsController {
             @RequestParam(defaultValue = "0") offset: Long,
             @RequestParam(defaultValue = "100") limit: Long,
             @RequestParam sortBy: String?,
-            @RequestParam(defaultValue = "false") sortDesc: Boolean
+            @RequestParam(defaultValue = "false") desc: Boolean
     ): List<Victim> {
-        return victimsService.getVictims(offset, limit, sortBy, sortDesc);
+        return victimsService.getVictims(offset, limit, sortBy, desc)
     }
 
     @GetMapping("/victim/by/{property}/{value}")
@@ -35,12 +35,12 @@ class VictimsController {
             @RequestParam(defaultValue = "0") offset: Long,
             @RequestParam(defaultValue = "100") limit: Long,
             @RequestParam sortBy: String?,
-            @RequestParam(defaultValue = "false") sortDesc: Boolean,
+            @RequestParam(defaultValue = "false") desc: Boolean,
             @PathVariable property: Victim.Property<*>,
             @PathVariable value: String
     ): List<Victim> {
 
-        return victimsService.getVictims(offset, limit, sortBy, sortDesc, property, value)
+        return victimsService.getVictims(offset, limit, sortBy, desc, property, value)
     }
 
     @GetMapping("/victim/between/date")
