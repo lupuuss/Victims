@@ -30,6 +30,34 @@ class VictimsController {
         return victimsService.getVictims(offset, limit, sortBy, desc)
     }
 
+    @PostMapping("/victim")
+    fun addVictim(@RequestBody details: VictimDetails): Victim  {
+        return victimsService.addNewVictim(details)
+    }
+
+    @PostMapping("/victim/now")
+    fun addVictim(@RequestBody detailsNow: VictimDetailsNow): Victim {
+        return victimsService.addNewVictimNow(detailsNow)
+    }
+
+    @GetMapping("/victim/id/{id}")
+    fun getVictimById(@PathVariable id: String): Optional<Victim> {
+        return victimsService.getVictims(id)
+    }
+
+    @DeleteMapping("/victim/id/{id}")
+    fun removeVictimById(@PathVariable id: String) {
+        return victimsService.removeVictim(id)
+    }
+
+    @PutMapping("/victim/id/{id}")
+    fun updateVictimWithId(
+            @PathVariable id: String,
+            @RequestBody victimDetails: VictimDetails
+    ): Victim {
+        return victimsService.updateVictimWithId(id, victimDetails)
+    }
+
     @GetMapping("/victim/by/{property}/{value}")
     fun getVictimsByProperty(
             @RequestParam(defaultValue = "0") offset: Long,
@@ -50,20 +78,5 @@ class VictimsController {
     ): List<Victim> {
 
         return victimsService.getVictimsByDateBoundaries(from, to)
-    }
-
-    @PostMapping("/victim/new")
-    fun addVictim(@RequestBody details: VictimDetails): Victim  {
-        return victimsService.addNewVictim(details)
-    }
-
-    @PostMapping("/victim/new/now")
-    fun addVictim(@RequestBody detailsNow: VictimDetailsNow): Victim {
-        return victimsService.addNewVictimNow(detailsNow)
-    }
-
-    @DeleteMapping("/victim/remove/id/{id}")
-    fun removeVictimById(@PathVariable id: String) {
-        return victimsService.removeVictim(id)
     }
 }

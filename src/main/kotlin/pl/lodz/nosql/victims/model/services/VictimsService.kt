@@ -112,4 +112,12 @@ class VictimsService {
 
         repository.deleteById(id)
     }
+
+    fun updateVictimWithId(id: String, victimDetails: VictimDetails): Victim {
+        return repository.save(victimDetails.toVictim(id))
+    }
+
+    fun getVictims(id: String): Optional<Victim> {
+        return repository.findById(id)
+    }
 }
