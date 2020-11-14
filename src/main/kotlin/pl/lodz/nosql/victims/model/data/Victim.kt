@@ -102,26 +102,6 @@ data class Victim (
 }
 
 data class VictimDetails(
-        @DateTimeFormat(pattern = Victim.dateStringFormat)
-        val date : Date,
-        val name : String?,
-        val age : Int?,
-        val gender : String?,
-        val race : String?,
-        val city : String?,
-        val state : String?,
-        val mannerOfDeath : String?,
-        val armed : String?,
-        val mentalIllness : Boolean?,
-        val flee : Boolean?
-) {
-    fun toVictim(id: String): Victim = Victim(
-            id, name, age, gender, race, date, city,
-            state, mannerOfDeath, armed, mentalIllness, flee
-    )
-}
-
-data class VictimDetailsNow(
         val name : String?,
         val age : Int?,
         val gender : String?,

@@ -5,7 +5,6 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import pl.lodz.nosql.victims.model.data.Victim
 import pl.lodz.nosql.victims.model.data.VictimDetails
-import pl.lodz.nosql.victims.model.data.VictimDetailsNow
 import pl.lodz.nosql.victims.model.repository.IdGenerator
 import pl.lodz.nosql.victims.model.repository.VictimsRepository
 import java.util.*
@@ -97,13 +96,7 @@ class VictimsService {
 
     fun addNewVictim(victimDetails: VictimDetails): Victim {
 
-        val victim = victimDetails.toVictim(idGenerator.generate())
-
-        return repository.save(victim)
-    }
-
-    fun addNewVictimNow(victimDetailsNow: VictimDetailsNow): Victim {
-        val victim = victimDetailsNow.toVictim(idGenerator.generate(), Date())
+        val victim = victimDetails.toVictim(idGenerator.generate(), Date())
 
         return repository.save(victim)
     }
@@ -113,8 +106,15 @@ class VictimsService {
         repository.deleteById(id)
     }
 
-    fun updateVictimWithId(id: String, victimDetails: VictimDetails): Victim {
-        return repository.save(victimDetails.toVictim(id))
+    fun updateVictimWithId(id: String, victimDetails: VictimDetails): Optional<Victim> {
+
+        val victim = repository.findById(id)
+
+        if (victim.isEmpty) {
+            return Optional.empty()
+        }
+
+        return Optional.of(repository.save(victimDetails.toVictim(id, victim.get().date)))
     }
 
     fun getVictims(id: String): Optional<Victim> {

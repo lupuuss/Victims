@@ -5,7 +5,6 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.web.bind.annotation.*
 import pl.lodz.nosql.victims.model.data.Victim
 import pl.lodz.nosql.victims.model.data.VictimDetails
-import pl.lodz.nosql.victims.model.data.VictimDetailsNow
 import pl.lodz.nosql.victims.model.services.VictimsService
 import java.util.*
 
@@ -35,11 +34,6 @@ class VictimsController {
         return victimsService.addNewVictim(details)
     }
 
-    @PostMapping("/victim/now")
-    fun addVictim(@RequestBody detailsNow: VictimDetailsNow): Victim {
-        return victimsService.addNewVictimNow(detailsNow)
-    }
-
     @GetMapping("/victim/id/{id}")
     fun getVictimById(@PathVariable id: String): Optional<Victim> {
         return victimsService.getVictims(id)
@@ -47,14 +41,14 @@ class VictimsController {
 
     @DeleteMapping("/victim/id/{id}")
     fun removeVictimById(@PathVariable id: String) {
-        return victimsService.removeVictim(id)
+        victimsService.removeVictim(id)
     }
 
     @PutMapping("/victim/id/{id}")
     fun updateVictimWithId(
             @PathVariable id: String,
             @RequestBody victimDetails: VictimDetails
-    ): Victim {
+    ): Optional<Victim> {
         return victimsService.updateVictimWithId(id, victimDetails)
     }
 
