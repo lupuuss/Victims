@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*
 import pl.lodz.nosql.victims.model.data.Victim
 import pl.lodz.nosql.victims.model.data.VictimDTO
 import pl.lodz.nosql.victims.model.data.VictimDetails
+import pl.lodz.nosql.victims.HelpResponse
 import pl.lodz.nosql.victims.model.services.VictimServiceException
 import pl.lodz.nosql.victims.model.services.VictimsService
 import java.util.*
@@ -90,8 +91,8 @@ class VictimsController {
     }
 
     @GetMapping("/")
-    fun getHelp(): String {
-        return "TODO help here! :)"
+    fun getHelp(): HelpResponse {
+        return HelpResponse
     }
 
 }
