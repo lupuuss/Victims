@@ -1,10 +1,13 @@
 package pl.lodz.nosql.victims.model.data
 
-import org.bson.types.ObjectId
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.format.annotation.DateTimeFormat
+import pl.lodz.nosql.victims.model.services.PropertyArgumentConversionException
+import pl.lodz.nosql.victims.model.services.PropertyInvalidArgumentException
+import pl.lodz.nosql.victims.model.services.PropertyNotFoundException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -58,22 +61,48 @@ data class Victim (
         }
 
         abstract class BooleanBased : Property<Boolean>() {
-            override fun mapArg(value: String): Boolean = value.toBoolean()
+            override fun mapArg(value: String): Boolean {
+                return try {
+                    value.toBoolean()
+                } catch (e: Exception) {
+                    throw PropertyArgumentConversionException(value, "Boolean", e)
+                }
+            }
         }
 
         abstract class IntBased : Property<Int>() {
-            override fun mapArg(value: String): Int = value.toInt()
+            override fun mapArg(value: String): Int {
+                return try {
+                    value.toInt()
+                } catch (e: NumberFormatException) {
+                    throw PropertyArgumentConversionException(value, "Int", e)
+                }
+            }
         }
 
         abstract class DateBased : Property<java.util.Date>() {
             override fun mapArg(value: String): java.util.Date {
-                return SimpleDateFormat(dateStringFormat).parse(value)
+                return try {
+                    SimpleDateFormat(dateStringFormat).parse(value)
+                } catch (e: java.text.ParseException) {
+                    throw PropertyArgumentConversionException(value, "Date(format='$dateStringFormat')", e)
+                }
             }
         }
 
         object Id : StringBased()
         object Name : StringBased()
-        object Age : IntBased()
+        object Age : IntBased() {
+            override fun mapArg(value: String): Int {
+                val parsedValue = super.mapArg(value)
+
+                if (parsedValue <= 0) {
+                    throw PropertyInvalidArgumentException("Age must be a positive number! Passed: $parsedValue")
+                } else {
+                    return parsedValue
+                }
+            }
+        }
         object Gender : StringBased()
         object Race : StringBased()
         object Date : DateBased()
@@ -92,7 +121,8 @@ data class Victim (
                     Armed, MentalIllness, Flee
             )
 
-            fun of(name: String) = values.find { it.name.equals(name, ignoreCase = true) }!!
+            fun of(name: String) = values.find { it.name.equals(name, ignoreCase = true) }
+                    ?: throw PropertyNotFoundException(name)
         }
     }
 
@@ -117,4 +147,75 @@ data class VictimDetails(
             id, name, age, gender, race, date, city, state,
             mannerOfDeath, armed, mentalIllness, flee
     )
+}
+
+class VictimDTO {
+    private val values: MutableMap<Victim.Property<*>, String?> = mutableMapOf()
+
+    @Field("name")
+    fun setName(name: String?) {
+        values[Victim.Property.Name] = name
+    }
+
+    @Field("age")
+    fun setAge(age: Int?) {
+        values[Victim.Property.Age] = age?.toString()
+    }
+
+    @Field("gender")
+    fun setGender(gender: String?) {
+        values[Victim.Property.Gender] = gender
+    }
+
+    @Field("race")
+    fun setRace(race: String?) {
+        values[Victim.Property.Race] = race
+    }
+
+    @Field("date")
+    fun setDate(date: Date?) {
+        values[Victim.Property.Date] = date?.toString()
+    }
+    @Field("city")
+    fun setCity(city: String?) {
+        values[Victim.Property.City] = city
+    }
+
+    @Field("state")
+    fun setState(state: String?) {
+        values[Victim.Property.State] = state
+    }
+
+    @Field("mannerOfDeath")
+    fun setMannerOfDeath(mannerOfDeath: String?) {
+        values[Victim.Property.MannerOfDeath] = mannerOfDeath
+    }
+
+    @Field("armed")
+    fun setArmed(armed: String?) {
+        values[Victim.Property.Armed] = armed
+    }
+
+    @Field("mentalIllness")
+    fun setMentalIllness(mentalIllness: Boolean?) {
+        values[Victim.Property.MentalIllness] = mentalIllness?.toString()
+    }
+
+    @Field("Flee")
+    fun setFlee(flee: Boolean?) {
+        values[Victim.Property.Flee] = flee?.toString()
+    }
+
+
+    fun accessValues() = values
+
+    fun <T> accessValue(property: Victim.Property<T>): Optional<T>? {
+        if (!values.containsKey(property)) {
+            return null
+        }
+
+        return values[property]?.let {
+            Optional.of(property.mapArg(it))
+        } ?: Optional.empty()
+    }
 }

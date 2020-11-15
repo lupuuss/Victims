@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import pl.lodz.nosql.victims.model.data.Victim
+import pl.lodz.nosql.victims.model.data.VictimDTO
 import pl.lodz.nosql.victims.model.data.VictimDetails
 import pl.lodz.nosql.victims.model.repository.IdGenerator
 import pl.lodz.nosql.victims.model.repository.VictimsRepository
@@ -23,10 +24,10 @@ class VictimsService {
     fun getVictims(offset: Long, limit: Long, sortBy: String?, sortDesc: Boolean): List<Victim> {
 
         val sort = if (sortBy != null) {
-            Sort.by(
-                    if (sortDesc) Sort.Direction.DESC else Sort.Direction.ASC,
-                    sortBy
-            )
+
+            val direction = if (sortDesc) Sort.Direction.DESC else Sort.Direction.ASC
+            Sort.by(direction, sortBy)
+
         } else {
             Sort.unsorted()
         }
@@ -79,7 +80,7 @@ class VictimsService {
             is Victim.Property.Armed -> repository.findByArmedContains(value, sort)
             is Victim.Property.MentalIllness -> repository.findByMentalIllness(property.mapArg(value), sort)
             is Victim.Property.Flee -> repository.findByFlee(property.mapArg(value), sort)
-            else -> throw Exception()
+            else -> throw PropertyNotSupportedException(property)
         }.stream()
     }
 
@@ -103,21 +104,48 @@ class VictimsService {
 
     fun removeVictim(id: String) {
 
-        repository.deleteById(id)
+        val victim = repository.findById(id).orElseThrow { throw VictimNotFoundException(id) }
+
+        repository.deleteById(victim.id)
     }
 
-    fun updateVictimWithId(id: String, victimDetails: VictimDetails): Optional<Victim> {
+    fun patchVictimWithId(id: String, dto: VictimDTO): Victim {
 
-        val victim = repository.findById(id)
+        val victim = repository.findById(id).orElseThrow { throw VictimNotFoundException(id) }
 
-        if (victim.isEmpty) {
-            return Optional.empty()
+        println(dto)
+
+        val newVictim = Victim(
+                id,
+                processProperty(dto, Victim.Property.Name, victim.name),
+                processProperty(dto, Victim.Property.Age, victim.age),
+                processProperty(dto, Victim.Property.Gender, victim.gender),
+                processProperty(dto, Victim.Property.Race, victim.race),
+                victim.date,
+                processProperty(dto, Victim.Property.City, victim.city),
+                processProperty(dto, Victim.Property.State, victim.state),
+                processProperty(dto, Victim.Property.MannerOfDeath, victim.mannerOfDeath),
+                processProperty(dto, Victim.Property.Armed, victim.armed),
+                processProperty(dto, Victim.Property.MentalIllness, victim.mentalIllness),
+                processProperty(dto, Victim.Property.Flee, victim.flee
+                )
+        )
+
+        return repository.save(newVictim)
+    }
+
+    private fun <T> processProperty(dto: VictimDTO, property: Victim.Property<T>, currentValue: T?): T? {
+        val passedValue = dto.accessValue(property) ?: return currentValue
+
+        return if (passedValue.isPresent) {
+            passedValue.get()
+        } else {
+            null
         }
 
-        return Optional.of(repository.save(victimDetails.toVictim(id, victim.get().date)))
     }
 
-    fun getVictims(id: String): Optional<Victim> {
-        return repository.findById(id)
+    fun getVictims(id: String): Victim {
+        return repository.findById(id).orElseThrow { throw VictimNotFoundException(id) }
     }
 }
