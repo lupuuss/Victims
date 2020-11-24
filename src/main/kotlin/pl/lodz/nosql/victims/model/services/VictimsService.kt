@@ -94,7 +94,6 @@ class VictimsService {
         }
     }
 
-
     fun addNewVictim(victimDetails: VictimDetails): Victim {
 
         val victim = victimDetails.toVictim(idGenerator.generate(), Date())
@@ -109,7 +108,7 @@ class VictimsService {
         repository.deleteById(victim.id)
     }
 
-    fun patchVictimWithId(id: String, dto: VictimDTO): Victim {
+    fun updateVictimWithId(id: String, dto: VictimDTO): Victim {
 
         val victim = repository.findById(id).orElseThrow { throw VictimNotFoundException(id) }
 
@@ -132,6 +131,10 @@ class VictimsService {
         )
 
         return repository.save(newVictim)
+    }
+
+    fun putVictimWithId(id: String, victim: Victim): Victim {
+        return repository.save(victim)
     }
 
     private fun <T> processProperty(dto: VictimDTO, property: Victim.Property<T>, currentValue: T?): T? {

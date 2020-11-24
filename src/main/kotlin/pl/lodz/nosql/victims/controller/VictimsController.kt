@@ -72,7 +72,13 @@ class VictimsController {
             @RequestBody dto: VictimDTO
     ): Victim {
 
-        return victimsService.patchVictimWithId(id, dto)
+        return victimsService.updateVictimWithId(id, dto)
+    }
+
+    @PutMapping("/victim/id/{id}")
+    fun putVictimWithId(@PathVariable id: String, @RequestBody victimDto: VictimDTO): Victim {
+
+        return victimsService.putVictimWithId(id, victimDto.toVictim(id))
     }
 
     @GetMapping("/victim")

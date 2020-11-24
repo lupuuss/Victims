@@ -56,11 +56,11 @@ data class Victim (
 
         abstract fun mapArg(value: String): T
 
-        abstract class StringBased : Property<String>() {
+        abstract class StringBased : Property<String?>() {
             override fun mapArg(value: String): String = value
         }
 
-        abstract class BooleanBased : Property<Boolean>() {
+        abstract class BooleanBased : Property<Boolean?>() {
             override fun mapArg(value: String): Boolean {
                 return try {
                     value.toBoolean()
@@ -70,7 +70,7 @@ data class Victim (
             }
         }
 
-        abstract class IntBased : Property<Int>() {
+        abstract class IntBased : Property<Int?>() {
             override fun mapArg(value: String): Int {
                 return try {
                     value.toInt()
@@ -218,4 +218,19 @@ class VictimDTO {
             Optional.of(property.mapArg(it))
         } ?: Optional.empty()
     }
+
+    fun toVictim(id: String): Victim = Victim(
+            id,
+            accessValue(Victim.Property.Name)?.get(),
+            accessValue(Victim.Property.Age)?.get(),
+            accessValue(Victim.Property.Gender)?.get(),
+            accessValue(Victim.Property.Race)?.get(),
+            accessValue(Victim.Property.Date)?.get() ?: Date(),
+            accessValue(Victim.Property.City)?.get(),
+            accessValue(Victim.Property.State)?.get(),
+            accessValue(Victim.Property.MannerOfDeath)?.get(),
+            accessValue(Victim.Property.Armed)?.get(),
+            accessValue(Victim.Property.MentalIllness)?.get(),
+            accessValue(Victim.Property.Flee)?.get()
+    )
 }
